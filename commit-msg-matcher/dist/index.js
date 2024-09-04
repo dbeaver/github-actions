@@ -31217,10 +31217,11 @@ async function main() {
   }
 
   const patterns = lastCommitMessage.match(commitMsgTemplate);
+  console.log(patterns)
 
-
-
-  if (patterns) {
+  if (patterns === 'Merge') {
+    process.exit(0);
+  } else if (patterns) {
     ticket = msgBelongsTo(patterns[0]);
   } else {
     console.error(errorMsg);
