@@ -42,7 +42,7 @@ async function requestIssue(ticket) {
   const response = await fetch(ticket.ticketUri(), {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${Buffer.from(
+      'Authorization': `${authMethod} ${Buffer.from(
         authHeader
       ).toString('base64')}`,
       'Accept': 'application/json'
