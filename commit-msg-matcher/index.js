@@ -126,9 +126,9 @@ async function main() {
   const patterns = lastCommitMessage.match(commitMsgTemplate);
   console.log(patterns)
 
-  if (patterns === 'Merge') {
+  if (patterns[0] === 'Merge') {
     process.exit(0);
-  } else if (patterns) {
+  } else if (patterns[0]) {
     ticket = msgBelongsTo(patterns[0]);
   } else {
     console.error(errorMsg);
