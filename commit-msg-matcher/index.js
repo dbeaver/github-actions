@@ -31,7 +31,7 @@ const errorMsg = `
 async function requestIssue(ticket) {
 
   let authHeader = githubAccessToken;
-  let authMethod = 'Bearer'
+  let authMethod = 'Basic'
 
   if (ticket.board == 'jira') {
     authHeader = 'devops@dbeaver.com:' + jiraAccessToken;
