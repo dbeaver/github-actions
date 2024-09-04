@@ -1,0 +1,18 @@
+inputs:
+  githubAccessToken:
+    description: 'you must provide GITHUB_TOKEN'
+    required: false
+    default: null
+  jiraAccessToken:
+    description: 'you must provide JIRA_TOKEN'
+    required: false
+    default: null
+  curRepoToken:
+    description: 'Get current repo context'
+    default: ${{ github.token }}
+outputs:
+  time:
+    description: 'The time we greeted you'    
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
