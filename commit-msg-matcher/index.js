@@ -30,11 +30,11 @@ const errorMsg = `
 
 async function requestIssue(ticket) {
 
-  let authHeader = githubAccessToken;
+  let authToken = 'dbeaver-devops:' + githubAccessToken;
   let authMethod = 'Basic'
 
   if (ticket.board == 'jira') {
-    authHeader = 'devops@dbeaver.com:' + jiraAccessToken;
+    authToken = 'devops@dbeaver.com:' + jiraAccessToken;
     authMethod = 'Basic';
   }
 
@@ -43,7 +43,7 @@ async function requestIssue(ticket) {
     method: 'GET',
     headers: {
       'Authorization': `${authMethod} ${Buffer.from(
-        authHeader
+        authToken
       ).toString('base64')}`,
       'Accept': 'application/json'
     }
