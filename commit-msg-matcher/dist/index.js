@@ -31124,12 +31124,13 @@ const errorMsg = `
 async function requestIssue(ticket) {
 
   let authHeader = githubAccessToken;
-  console.log(ticket.board)
+  let authMethod = 'Bearer'
 
   if (ticket.board == 'jira') {
     authHeader = 'devops@dbeaver.com:' + jiraAccessToken;
-    console.log(ticket.board)
+    authMethod = 'Basic';
   }
+
 
   const response = await fetch(ticket.ticketUri(), {
     method: 'GET',
