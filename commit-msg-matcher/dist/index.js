@@ -31111,7 +31111,6 @@ const githubAccessToken = core.getInput('githubAccessToken');
 const errorMsg = `
             Each commit message must begin with GitHub or Jira ticket reference. Like:
             *  #<issue_number>
-            *  repo#<issue_number>
             *  org/repo#<issue_number>
             *  DB-Number (Jira)
             *  CB-Number (Jira)
