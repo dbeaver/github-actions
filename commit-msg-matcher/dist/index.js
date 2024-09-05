@@ -31123,11 +31123,11 @@ const errorMsg = `
 
 async function requestIssue(ticket) {
 
-  let authToken = 'dbeaver-devops:' + githubAccessToken;
+  let authToken = githubAccessToken;
   let authMethod = 'Basic'
 
   if (ticket.board == 'jira') {
-    authToken = 'devops@dbeaver.com:' + jiraAccessToken;
+    authToken = jiraAccessToken;
     authMethod = 'Basic';
   }
 
