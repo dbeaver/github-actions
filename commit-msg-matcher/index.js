@@ -129,7 +129,7 @@ async function main() {
   const patterns = lastCommitMessage.match(commitMsgTemplate);
   console.log(patterns)
   
-  if (patterns.length === 0) { 
+  if (patterns === null) { 
     console.error(errorMsg);
     core.setFailed('Commit message validation failed.');
   }
