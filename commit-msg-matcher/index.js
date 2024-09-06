@@ -132,6 +132,7 @@ async function main() {
   if (patterns === null) { 
     console.error(errorMsg);
     core.setFailed('Commit message validation failed.');
+    process.exit(1);
   }
 
   if (patterns[0] === 'Merge') {
