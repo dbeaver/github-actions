@@ -31221,6 +31221,11 @@ async function main() {
 
   const patterns = lastCommitMessage.match(commitMsgTemplate);
   console.log(patterns)
+  
+  if (patterns.length === 0) { 
+    console.error(errorMsg);
+    core.setFailed('Commit message validation failed.');
+  }
 
   if (patterns[0] === 'Merge') {
     process.exit(0);
