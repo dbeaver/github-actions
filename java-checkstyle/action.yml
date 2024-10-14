@@ -33,16 +33,34 @@ runs:
               -Dcheckstyle.consoleOutput=true -Dcheckstyle.includes=$file > checkstyle-report.txt || true
         done
 
+    - name: Show Checkstyle Report
+      if: steps.changed_files.outputs.files != ''
+      shell: bash
+      run: |
+        echo "Checkstyle Report Output:"
+        cat checkstyle-report.txt
+
     - name: Parse Checkstyle output and annotate issues
       if: steps.changed_files.outputs.files != ''
       shell: bash
       run: |
         # This script parses the Checkstyle output and annotates lines with issues
         while IFS= read -r line; do
-          if [[ $line =~ ^\[(.*)\]\ +([a-zA-Z0-9/_-]+\.java):([0-9]+):([0-9]+):\ (.+)$ ]]; then
+          echo "Processing line: $line"  # Debug output
+          # Updated regular expression for Checkstyle output
+          if [[ $line =~ ^\[(ERROR|WARNING)\]\ +([a-zA-Z0-9/_-]+\.java):([0-9]+):([0-9]+):\ (.+)$ ]]; then
+            severity="${BASH_REMATCH[1]}"
             file="${BASH_REMATCH[2]}"
             line_number="${BASH_REMATCH[3]}"
+            column_number="${BASH_REMATCH[4]}"
             message="${BASH_REMATCH[5]}"
-            echo "::warning file=$file,line=$line_number::${message}"
+            echo "Severity: $severity, File: $file, Line: $line_number, Column: $column_number, Message: $message"  # Debug output
+            
+            # Use GitHub annotations for warning or error based on severity
+            if [[ "$severity" == "ERROR" ]]; then
+              echo "::error file=$file,line=$line_number,col=$column_number::${message}"
+            else
+              echo "::warning file=$file,line=$line_number,col=$column_number::${message}"
+            fi
           fi
         done < checkstyle-report.txt
