@@ -1,0 +1,47 @@
+name: 'Java Checkstyle Action'
+description: 'Runs Checkstyle on changed Java files and annotates issues using GitHub code annotations.'
+
+inputs:
+  checkstyle_config:
+    description: 'The Checkstyle configuration file to use.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Fetch base branch
+      shell: bash
+      run: |
+        git fetch origin "${{ github.base_ref }}" --depth=1
+
+    - name: Get changed Java files
+      id: changed_files
+      shell: bash
+      run: |
+        FILES=$(git diff --name-only 'origin/${{ github.base_ref }}' ${{ github.sha }} -- '*.java')
+        echo "Changed Java files: $FILES"
+        echo "::set-output name=files::$FILES"
+
+    - name: Run Checkstyle on changed files
+      if: steps.changed_files.outputs.files != ''
+      shell: bash
+      run: |
+        for file in ${{ steps.changed_files.outputs.files }}; do
+          echo "Running Checkstyle on $file"
+          mvn checkstyle:checkstyle -Dcheckstyle.config.location=${{ inputs.checkstyle_config }} \
+              -Dcheckstyle.consoleOutput=true -Dcheckstyle.includes=$file > checkstyle-report.txt || true
+        done
+
+    - name: Parse Checkstyle output and annotate issues
+      if: steps.changed_files.outputs.files != ''
+      shell: bash
+      run: |
+        # This script parses the Checkstyle output and annotates lines with issues
+        while IFS= read -r line; do
+          if [[ $line =~ ^\[(.*)\]\ +([a-zA-Z0-9/_-]+\.java):([0-9]+):([0-9]+):\ (.+)$ ]]; then
+            file="${BASH_REMATCH[2]}"
+            line_number="${BASH_REMATCH[3]}"
+            message="${BASH_REMATCH[5]}"
+            echo "::warning file=$file,line=$line_number::${message}"
+          fi
+        done < checkstyle-report.txt
