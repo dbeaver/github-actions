@@ -5,6 +5,9 @@ inputs:
   checkstyle_config:
     description: 'The Checkstyle configuration file to use.'
     required: true
+  checkstyle_version:
+    description: 'The version of Checkstyle to download and use.'
+    required: true
 
 runs:
   using: 'composite'
@@ -23,15 +26,23 @@ runs:
         # Write output to GITHUB_OUTPUT file for sharing between steps
         echo "files=$FILES" >> $GITHUB_OUTPUT
 
+    - name: Download Checkstyle JAR
+      shell: bash
+      run: |
+        CHECKSTYLE_URL="https://github.com/checkstyle/checkstyle/releases/download/checkstyle-${{ inputs.checkstyle_version }}/checkstyle-${{ inputs.checkstyle_version }}-all.jar"
+        echo "Downloading Checkstyle from $CHECKSTYLE_URL"
+        curl -LJO "$CHECKSTYLE_URL"
+        CHECKSTYLE_JAR="checkstyle-${{ inputs.checkstyle_version }}-all.jar"
+        echo "Checkstyle downloaded as $CHECKSTYLE_JAR"
+
     - name: Run Checkstyle on changed files
       if: steps.changed_files.outputs.files != ''
       shell: bash
       run: |
-        for file in ${{ steps.changed_files.outputs.files }}; do
-          echo "Running Checkstyle on $file"
-          mvn checkstyle:checkstyle -Dcheckstyle.config.location=${{ inputs.checkstyle_config }} \
-              -Dcheckstyle.consoleOutput=true -Dcheckstyle.includes=$file > checkstyle-report.txt || true
-        done
+        CHECKSTYLE_JAR="checkstyle-${{ inputs.checkstyle_version }}-all.jar"
+        FILES="${{ steps.changed_files.outputs.files }}"
+        echo "Running Checkstyle on changed files: $FILES"
+        java -jar $CHECKSTYLE_JAR -c ${{ inputs.checkstyle_config }} $FILES > checkstyle-report.txt || true
 
     - name: Show Checkstyle Report
       if: steps.changed_files.outputs.files != ''
