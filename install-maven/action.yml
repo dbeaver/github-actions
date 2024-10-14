@@ -14,11 +14,10 @@ runs:
       shell: bash
       run: |
         MAVEN_VERSION=${{ inputs.maven-version }}
-        sudo apt-get update
-        sudo apt-get install -y wget tar
-        wget https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+        wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz
         sudo tar xzvf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt
-        sudo ln -s /opt/apache-maven-${MAVEN_VERSION}/bin/mvn /usr/bin/mvn
+        echo "Adding Maven ${MAVEN_VERSION} to PATH"
+        echo "export PATH=/opt/apache-maven-${MAVEN_VERSION}/bin:$PATH" >> $GITHUB_ENV
         echo "Maven $MAVEN_VERSION installed on Ubuntu"
 
     - name: Install Maven on Windows
@@ -28,7 +27,8 @@ runs:
         $MavenVersion = '${{ inputs.maven-version }}'
         Invoke-WebRequest https://downloads.apache.org/maven/maven-3/$MavenVersion/binaries/apache-maven-$MavenVersion-bin.zip -OutFile apache-maven.zip
         Expand-Archive -Path apache-maven.zip -DestinationPath $Env:ProgramFiles\Maven
-        $Env:Path += ";$Env:ProgramFiles\Maven\apache-maven-$MavenVersion\bin"
+        echo "Adding Maven ${MavenVersion} to PATH"
+        echo "C:\ProgramFiles\Maven\apache-maven-$MavenVersion\bin" >> $Env:GITHUB_ENV
         echo "Maven $MavenVersion installed on Windows"
 
     - name: Install Maven on macOS
@@ -37,6 +37,8 @@ runs:
       run: |
         MAVEN_VERSION=${{ inputs.maven-version }}
         brew install maven@$MAVEN_VERSION
+        echo "Adding Maven ${MAVEN_VERSION} to PATH"
+        echo "export PATH=/usr/local/opt/maven@${MAVEN_VERSION}/bin:$PATH" >> $GITHUB_ENV
         echo "Maven $MAVEN_VERSION installed on macOS"
 
     - name: Verify Maven Installation
