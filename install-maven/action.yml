@@ -25,7 +25,7 @@ runs:
       shell: pwsh
       run: |
         $MavenVersion = '${{ inputs.maven-version }}'
-        Invoke-WebRequest https://downloads.apache.org/maven/maven-3/$MavenVersion/binaries/apache-maven-$MavenVersion-bin.zip -OutFile apache-maven.zip
+        Invoke-WebRequest https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.zip -OutFile apache-maven.zip
         Expand-Archive -Path apache-maven.zip -DestinationPath $Env:ProgramFiles\Maven
         echo "Prepending Maven ${MavenVersion} to PATH"
         echo "C:\ProgramFiles\Maven\apache-maven-$MavenVersion\bin" | Out-File -Append -FilePath $Env:GITHUB_PATH
@@ -36,9 +36,10 @@ runs:
       shell: bash
       run: |
         MAVEN_VERSION=${{ inputs.maven-version }}
-        brew install maven@$MAVEN_VERSION
+        wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+        tar xzvf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt
         echo "Prepending Maven ${MAVEN_VERSION} to PATH"
-        echo "/usr/local/opt/maven@${MAVEN_VERSION}/bin" >> $GITHUB_PATH
+        echo "/opt/apache-maven-${MAVEN_VERSION}/bin" >> $GITHUB_PATH
         echo "Maven $MAVEN_VERSION installed on macOS"
 
     - name: Verify Maven Installation
