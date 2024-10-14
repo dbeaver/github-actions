@@ -20,7 +20,8 @@ runs:
       run: |
         FILES=$(git diff --name-only 'origin/${{ github.base_ref }}' ${{ github.sha }} -- '*.java')
         echo "Changed Java files: $FILES"
-        echo "::set-output name=files::$FILES"
+        # Write output to GITHUB_OUTPUT file for sharing between steps
+        echo "files=$FILES" >> $GITHUB_OUTPUT
 
     - name: Run Checkstyle on changed files
       if: steps.changed_files.outputs.files != ''
