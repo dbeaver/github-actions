@@ -1,0 +1,108 @@
+name: 'Java Checkstyle Action'
+description: 'Runs Checkstyle on changed Java files and annotates issues using GitHub code annotations.'
+
+inputs:
+  checkstyle_config:
+    description: 'The Checkstyle configuration file to use.'
+    required: true
+  checkstyle_version:
+    description: 'The version of Checkstyle to download and use.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Fetch base branch
+      shell: bash
+      run: |
+        git fetch origin "${{ github.base_ref }}" --depth=1
+
+    - name: Get changed Java files and their ranges
+      id: changed_files
+      shell: bash
+      run: |
+        # Get the list of changed Java files
+        FILES=$(git diff --name-only 'origin/${{ github.base_ref }}' ${{ github.sha }} -- '*.java')
+        echo "Changed Java files: $FILES"
+
+        # For each file, get the changed ranges
+        declare -A file_ranges
+        for file in $FILES; do
+          # Store the range (start and end) of changed lines per file
+          ranges=$(git diff -U0 'origin/${{ github.base_ref }}' ${{ github.sha }} -- "$file" | grep -Po '@@.*@@' | grep -Po '[0-9]+,[0-9]+')
+          echo "$file: $ranges"
+          file_ranges[$file]=$ranges
+        done
+
+        # Output changed files and ranges
+        echo "files=$FILES" >> $GITHUB_OUTPUT
+        for key in "${!file_ranges[@]}"; do
+          echo "$key:${file_ranges[$key]}"
+        done
+
+    - name: Download Checkstyle JAR
+      shell: bash
+      run: |
+        CHECKSTYLE_URL="https://github.com/checkstyle/checkstyle/releases/download/checkstyle-${{ inputs.checkstyle_version }}/checkstyle-${{ inputs.checkstyle_version }}-all.jar"
+        echo "Downloading Checkstyle from $CHECKSTYLE_URL"
+        curl -LJO "$CHECKSTYLE_URL"
+        CHECKSTYLE_JAR="checkstyle-${{ inputs.checkstyle_version }}-all.jar"
+        echo "Checkstyle downloaded as $CHECKSTYLE_JAR"
+
+    - name: Run Checkstyle on changed files
+      if: steps.changed_files.outputs.files != ''
+      shell: bash
+      run: |
+        CHECKSTYLE_JAR="checkstyle-${{ inputs.checkstyle_version }}-all.jar"
+        FILES="${{ steps.changed_files.outputs.files }}"
+        echo "Running Checkstyle on changed files: $FILES"
+        java -jar $CHECKSTYLE_JAR -c ${{ inputs.checkstyle_config }} $FILES > checkstyle-report.txt || true
+
+    - name: Show Checkstyle Report
+      if: steps.changed_files.outputs.files != ''
+      shell: bash
+      run: |
+        echo "Checkstyle Report Output:"
+        cat checkstyle-report.txt
+
+    - name: Parse Checkstyle output and annotate issues
+      if: steps.changed_files.outputs.files != ''
+      shell: bash
+      run: |
+        # This script parses the Checkstyle output and annotates lines with issues
+        declare -A file_ranges  # Store the changed ranges for files
+        while IFS= read -r line; do
+          echo "Processing line: $line"  # Debug output
+          
+          # Match the Checkstyle warning/error
+          if [[ "$line" =~ ^\[([A-Z]+)\]\ ([^:]+):([0-9]+):([0-9]+):\ (.+)$ ]]; then
+            severity="${BASH_REMATCH[1]}"
+            file="${BASH_REMATCH[2]}"
+            line_number="${BASH_REMATCH[3]}"
+            column_number="${BASH_REMATCH[4]}"
+            message="${BASH_REMATCH[5]}"
+            echo "Severity: $severity, File: $file, Line: $line_number, Column: $column_number, Message: $message"  # Debug output
+
+            # Check if the line number is within the changed range for this file
+            changed_ranges=$(git diff -U0 'origin/${{ github.base_ref }}' ${{ github.sha }} -- "$file" | grep -Po '@@.*@@' | grep -Po '[0-9]+,[0-9]+')
+            within_range=false
+            for range in $changed_ranges; do
+              start=$(echo $range | cut -d',' -f1)
+              length=$(echo $range | cut -d',' -f2)
+              end=$((start + length))
+              if (( line_number >= start && line_number <= end )); then
+                within_range=true
+                break
+              fi
+            done
+
+            # Only annotate if within the changed range
+            if [ "$within_range" = true ]; then
+              if [[ "$severity" == "ERROR" ]]; then
+                echo "::error file=$file,line=$line_number,col=$column_number::${message}"
+              else
+                echo "::warning file=$file,line=$line_number,col=$column_number::${message}"
+              fi
+            fi
+          fi
+        done < checkstyle-report.txt
