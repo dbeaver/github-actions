@@ -1,0 +1,49 @@
+name: 'Install Maven'
+description: 'Installs a specified version of Maven depending on the runner OS.'
+inputs:
+  maven-version:
+    description: 'The Maven version to install.'
+    required: true
+    default: '3.9.6'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Maven on Ubuntu
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        MAVEN_VERSION=${{ inputs.maven-version }}
+        wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+        sudo tar xzvf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt
+        echo "Prepending Maven ${MAVEN_VERSION} to PATH"
+        echo "/opt/apache-maven-${MAVEN_VERSION}/bin" >> $GITHUB_PATH
+        echo "Maven $MAVEN_VERSION installed on Ubuntu"
+
+    - name: Install Maven on Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $MavenVersion = '${{ inputs.maven-version }}'
+        Invoke-WebRequest https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MavenVersion/apache-maven-$MavenVersion-bin.zip -OutFile apache-maven.zip
+        Expand-Archive -Path apache-maven.zip -DestinationPath $Env:ProgramFiles\Maven
+        echo "Prepending Maven ${MavenVersion} to PATH"
+        echo "C:\ProgramFiles\Maven\apache-maven-$MavenVersion\bin" | Out-File -Append -FilePath $Env:GITHUB_PATH
+        echo "Maven $MavenVersion installed on Windows"
+
+    - name: Install Maven on macOS
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        MAVEN_VERSION=${{ inputs.maven-version }}
+        mkdir -p $HOME/maven
+        wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+        tar xzvf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C $HOME/maven
+        echo "Prepending Maven ${MAVEN_VERSION} to PATH"
+        echo "$HOME/maven/apache-maven-${MAVEN_VERSION}/bin" >> $GITHUB_PATH
+        echo "Maven $MAVEN_VERSION installed on macOS"
+
+    - name: Verify Maven Installation
+      shell: bash
+      run: |
+        mvn -version
