@@ -59,7 +59,7 @@ runs:
         while IFS= read -r line; do
           echo "Processing line: $line"  # Debug output
           # Updated regular expression for Checkstyle output
-          if [[ $line =~ ^\[(ERROR|WARNING)\]\ +([a-zA-Z0-9/_-]+\.java):([0-9]+):([0-9]+):\ (.+)$ ]]; then
+          if [[ $line =~ ^\[([A-Z]+)\] +([^:]+):([0-9]+):([0-9]+): (.+)$ ]]; then
             severity="${BASH_REMATCH[1]}"
             file="${BASH_REMATCH[2]}"
             line_number="${BASH_REMATCH[3]}"
