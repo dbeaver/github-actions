@@ -25,6 +25,10 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Install git-restore-mtime
+      shell: bash
+      run: sudo apt install git-restore-mtime
+
     - name: Set github_head_ref and github_base_ref
       shell: bash
       run: |
@@ -49,12 +53,16 @@ runs:
           {
             default_branch=$(git ls-remote --symref "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" HEAD 2>/dev/null | grep '^ref:' | awk '{print $2}' | sed 's|refs/heads/||')
 
-            git clone --depth 1 -b "${{ env.GITHUB_HEAD_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
-            git clone --depth 1 -b "${{ env.GITHUB_BASE_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
-            git clone --depth 1 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo"
+            git clone --depth 0 -b "${{ env.GITHUB_HEAD_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
+            git clone --depth 0 -b "${{ env.GITHUB_BASE_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
+            git clone --depth 0 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo"
             if [[ $? -ne 0 ]]; then
               exit 1
             fi
+            
+            cd $repo
+            git restore-mtime
+            cd ..
           } &
 
           pids+=($!)
