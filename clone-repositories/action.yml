@@ -8,16 +8,19 @@ inputs:
       with the local git config, which enables your scripts to run authenticated git
       commands. The post-job step removes the PAT.
 
-
       We recommend using a service account with the least permissions necessary.
       Also when generating a new PAT, select the least scopes necessary.
-
 
       [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
     default: ${{ github.token }}
   project_deps_path:
     description: "The content of the project.deps file with repository names"
     required: true
+
+outputs:
+  cloned-folders:
+    description: "List of cloned repository directories"
+    value: ${{ steps.collect_cloned_folders.outputs.folders }}
 
 runs:
   using: "composite"
@@ -32,30 +35,44 @@ runs:
           echo "GITHUB_BASE_REF=${{ github.ref }}" >> $GITHUB_ENV
         fi
       shell: bash
+
     - name: Clone repositories from project.deps
       shell: bash
       run: |
         exit_code=0
+        cloned_repos=()
+
         while IFS= read -r repo || [[ -n $repo ]]; do
           echo "Cloning repository: $repo"
           {
             default_branch=$(git ls-remote --symref "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" HEAD | grep '^ref:' | awk '{print $2}' | sed 's|refs/heads/||')
 
             # Try to clone the head branch, then the base branch, and finally the default branch
-            git clone --depth 1 -b "${{ env.GITHUB_HEAD_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" 2>/dev/null || \
-            git clone --depth 1 -b "${{ env.GITHUB_BASE_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" 2>/dev/null || \
-            git clone --depth 1 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git"
+            git clone --depth 1 -b "${{ env.GITHUB_HEAD_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
+            git clone --depth 1 -b "${{ env.GITHUB_BASE_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
+            git clone --depth 1 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo"
 
-            # Capture the exit code of the last command
-            if [[ $? -ne 0 ]]; then
-              exit_code=1  # Set exit_code to 1 if any clone command fails
+            if [[ $? -eq 0 ]]; then
+              cloned_repos+=("$repo")
+            else
+              exit_code=1
             fi
           } &
         done < "${{ inputs.project_deps_path }}"
 
         wait
 
-        # Exit with the appropriate exit code
+        echo "Cloned repositories:"
+        printf "%s\n" "${cloned_repos[@]}"
+
+        echo "CLONED_FOLDERS<<EOF" >> $GITHUB_ENV
+        printf "%s\n" "${cloned_repos[@]}" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
         exit $exit_code
 
-
+    - name: Collect cloned folders
+      id: collect_cloned_folders
+      shell: bash
+      run: |
+        echo "folders=${CLONED_FOLDERS}" >> $GITHUB_OUTPUT
