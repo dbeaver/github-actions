@@ -77,6 +77,9 @@ runs:
           folders_json=$(printf '%s\n' "${cloned_repos[@]}" | jq -R . | jq -s .)
         fi
 
-        echo "folders=$folders_json" >> "$GITHUB_OUTPUT"
+        # Properly set multi-line output
+        echo "folders<<EOF" >> "$GITHUB_OUTPUT"
+        echo "$folders_json" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
 
         exit $exit_code
