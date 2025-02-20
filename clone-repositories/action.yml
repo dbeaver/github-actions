@@ -42,32 +42,34 @@ runs:
       run: |
         exit_code=0
         cloned_repos=()
+        pids=()
 
         while IFS= read -r repo || [[ -n $repo ]]; do
           echo "Cloning repository: $repo"
           {
-            default_branch=$(git ls-remote --symref "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" HEAD | grep '^ref:' | awk '{print $2}' | sed 's|refs/heads/||')
+            default_branch=$(git ls-remote --symref "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" HEAD 2>/dev/null | grep '^ref:' | awk '{print $2}' | sed 's|refs/heads/||')
 
-            # Try to clone the head branch, then the base branch, and finally the default branch
             git clone --depth 1 -b "${{ env.GITHUB_HEAD_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
             git clone --depth 1 -b "${{ env.GITHUB_BASE_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
             git clone --depth 1 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo"
 
             if [[ $? -eq 0 ]]; then
-              cloned_repos+=("\"$repo\"")
+              cloned_repos+=("$repo")
             else
               exit_code=1
             fi
           } &
+
+          pids+=($!)
         done < "${{ inputs.project_deps_path }}"
 
-        wait
+        wait "${pids[@]}"
 
         echo "Cloned repositories:"
         printf "%s\n" "${cloned_repos[@]}"
 
-        # Convert the array into a proper JSON format and set the output
-        folders_json="[$(IFS=,; echo "${cloned_repos[*]}")]"
+        # Properly format output using jq
+        folders_json=$(printf '%s\n' "${cloned_repos[@]}" | jq -R . | jq -s .)
         echo "folders=$folders_json" >> "$GITHUB_OUTPUT"
 
         exit $exit_code
