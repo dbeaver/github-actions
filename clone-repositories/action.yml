@@ -20,7 +20,7 @@ inputs:
 outputs:
   cloned-folders:
     description: "List of cloned repository directories"
-    value: ${{ steps.collect_cloned_folders.outputs.folders }}
+    value: ${{ steps.clone-repositories.outputs.folders }}
 
 runs:
   using: "composite"
@@ -37,6 +37,7 @@ runs:
       shell: bash
 
     - name: Clone repositories from project.deps
+      id: clone-repositories
       shell: bash
       run: |
         exit_code=0
@@ -65,14 +66,6 @@ runs:
         echo "Cloned repositories:"
         printf "%s\n" "${cloned_repos[@]}"
 
-        echo "CLONED_FOLDERS<<EOF" >> $GITHUB_ENV
-        printf "%s\n" "${cloned_repos[@]}" >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
+        echo "folders=${cloned_repos[*]}" >> "$GITHUB_OUTPUT"
 
         exit $exit_code
-
-    - name: Collect cloned folders
-      id: collect_cloned_folders
-      shell: bash
-      run: |
-        echo "folders=${CLONED_FOLDERS}" >> $GITHUB_OUTPUT
