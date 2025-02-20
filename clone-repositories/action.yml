@@ -52,10 +52,7 @@ runs:
             git clone --depth 1 -b "${{ env.GITHUB_HEAD_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
             git clone --depth 1 -b "${{ env.GITHUB_BASE_REF }}" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo" 2>/dev/null || \
             git clone --depth 1 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo"
-
-            if [[ $? -eq 0 ]]; then
-            else
-              echo "Failed to clone repository: $repo"
+            if [[ $? -ne 0 ]]; then
               exit 1
             fi
           } &
