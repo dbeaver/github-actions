@@ -26,6 +26,7 @@ runs:
   using: "composite"
   steps:
     - name: Set github_head_ref and github_base_ref
+      shell: bash
       run: |
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
           echo "GITHUB_HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
@@ -34,7 +35,6 @@ runs:
           echo "GITHUB_HEAD_REF=${{ github.ref }}" >> $GITHUB_ENV
           echo "GITHUB_BASE_REF=${{ github.ref }}" >> $GITHUB_ENV
         fi
-      shell: bash
 
     - name: Clone repositories from project.deps
       id: clone-repositories
@@ -54,7 +54,7 @@ runs:
             git clone --depth 1 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo"
 
             if [[ $? -eq 0 ]]; then
-              cloned_repos+=("$repo")
+              cloned_repos+=("\"$repo\"")
             else
               exit_code=1
             fi
@@ -66,6 +66,8 @@ runs:
         echo "Cloned repositories:"
         printf "%s\n" "${cloned_repos[@]}"
 
-        echo "folders=${cloned_repos[*]}" >> "$GITHUB_OUTPUT"
+        # Convert the array into a proper JSON format and set the output
+        folders_json="[$(IFS=,; echo "${cloned_repos[*]}")]"
+        echo "folders=$folders_json" >> "$GITHUB_OUTPUT"
 
         exit $exit_code
