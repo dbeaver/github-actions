@@ -41,8 +41,8 @@ runs:
       shell: bash
       run: |
         exit_code=0
-        cloned_repos=()
         pids=()
+        cloned_repos=()
 
         while IFS= read -r repo || [[ -n $repo ]]; do
           echo "Cloning repository: $repo"
@@ -54,9 +54,9 @@ runs:
             git clone --depth 1 -b "$default_branch" "https://${{ inputs.token }}@github.com/dbeaver/$repo.git" "$repo"
 
             if [[ $? -eq 0 ]]; then
-              cloned_repos+=("$repo")
             else
-              exit_code=1
+              echo "Failed to clone repository: $repo"
+              exit 1
             fi
           } &
 
@@ -65,11 +65,21 @@ runs:
 
         wait "${pids[@]}"
 
+        # Collect successfully cloned repos
+        while IFS= read -r repo || [[ -n $repo ]]; do
+          [[ -d "$repo" ]] && cloned_repos+=("$repo")
+        done < "${{ inputs.project_deps_path }}"
+
         echo "Cloned repositories:"
         printf "%s\n" "${cloned_repos[@]}"
 
-        # Properly format output using jq
-        folders_json=$(printf '%s\n' "${cloned_repos[@]}" | jq -R . | jq -s .)
+        # Ensure correct JSON output format
+        if [[ ${#cloned_repos[@]} -eq 0 ]]; then
+          folders_json="[]"
+        else
+          folders_json=$(printf '%s\n' "${cloned_repos[@]}" | jq -R . | jq -s .)
+        fi
+
         echo "folders=$folders_json" >> "$GITHUB_OUTPUT"
 
         exit $exit_code
