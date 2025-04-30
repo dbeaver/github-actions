@@ -118,7 +118,7 @@ async function main() {
       repo: github.context.payload.repository.name,
       pull_number: github.context.payload.number
   });
-  const lastCommit = listCommits.slice(-1);
+  const lastCommit = listCommits.slice(0);
   console.log(lastCommit[0].commit.message);
   const lastCommitMessage = lastCommit[0].commit.message;
   
