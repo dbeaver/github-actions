@@ -31211,8 +31211,6 @@ async function main() {
       repo: github.context.payload.repository.name,
       pull_number: github.context.payload.number
   });
-  console.log("listCommits:")
-  console.log(listCommits)
   const lastCommit = listCommits.slice(0);
   console.log(lastCommit[0].commit.message);
   const lastCommitMessage = lastCommit[0].commit.message;
