@@ -1,1 +1,2 @@
-# github-actions
+DBeaver standard workflows and actions
+
