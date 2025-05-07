@@ -73,7 +73,7 @@ function msgBelongsTo(msg) {
     let ticketMeta = msg.match(/^(\w+\/\w+-?\w+)#(\d{1,6})/);
     // ticketMeta[1] = board
     // ticketMeta[2] = ticket ID
-    return new Ticket(ticketMeta[1], ticketMeta[2])
+    return new Ticket(ticketMeta[1].trim(), ticketMeta[2].trim())
   }
   return 'Unknown repo';
 }
