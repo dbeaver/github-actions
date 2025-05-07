@@ -120,7 +120,7 @@ async function main() {
   });
   const lastCommit = listCommits.slice(0);
   console.log(lastCommit[0].commit.message);
-  const lastCommitMessage = lastCommit[0].commit.message;
+  const lastCommitMessage = lastCommit[0].commit.message.trim();
   
   if (!lastCommitMessage) {
     core.setFailed('Empty commit message.');
