@@ -31114,6 +31114,7 @@ const errorMsg = `
             *  org/repo#<issue_number>
             *  DB-Number (Jira)
             *  CB-Number (Jira)
+            *  WEB-Number (Jira)
 
             For how to rename your commit message, follow this GitHub Doc:
             https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/changing-a-commit-message
@@ -31159,6 +31160,14 @@ function msgBelongsTo(msg) {
     return new Ticket(board, ticketID);
   
   } else if (msg.substring(0, 2).toLowerCase() == "cb") {
+    let ticketMeta = msg.match(/^[A-Z]+-\d{1,6}/);
+    return new Ticket('jira', ticketMeta[0]);
+
+  } else if (msg.substring(0, 2).toLowerCase() == "db") {
+    let ticketMeta = msg.match(/^[A-Z]+-\d{1,6}/);
+    return new Ticket('jira', ticketMeta[0]);
+
+  } else if (msg.substring(0, 3).toLowerCase() == "web") {
     let ticketMeta = msg.match(/^[A-Z]+-\d{1,6}/);
     return new Ticket('jira', ticketMeta[0]);
 
@@ -31236,6 +31245,7 @@ async function main() {
     console.error(errorMsg);
     core.setFailed('Commit message validation failed.');
   }
+
   if (ticket) {
     await ticket.setStatus();
     console.log('Ticket status: ' + ticket.status)
