@@ -6,7 +6,7 @@ const github = require('@actions/github');
 
 const asyncFunction = (t) => new Promise(resolve => setTimeout(resolve, t));
 
-const commitMsgTemplate = /^#\d+|^[cdweb]+-\d+|^\w+\/\w+-?\w+#\d{1,6}|^Merge/gi;
+const commitMsgTemplate = /^#\d+|^[cdwebCDWEB]+-\d+|^\w+\/\w+-?\w+#\d{1,6}|^Merge/gi;
 
 const jiraUssueApi = "https://dbeaver.atlassian.net/rest/api/2/issue/";
 const githubUssueApi = "https://api.github.com/repos/";
@@ -67,15 +67,15 @@ function msgBelongsTo(msg) {
     return new Ticket(board, ticketID);
   
   } else if (msg.substring(0, 2).toLowerCase() == "cb") {
-    let ticketMeta = msg.match(/^[A-Z]+-\d{1,6}/);
+    let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
     return new Ticket('jira', ticketMeta[0]);
 
   } else if (msg.substring(0, 2).toLowerCase() == "db") {
-    let ticketMeta = msg.match(/^[A-Z]+-\d{1,6}/);
+    let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
     return new Ticket('jira', ticketMeta[0]);
 
   } else if (msg.substring(0, 3).toLowerCase() == "web") {
-    let ticketMeta = msg.match(/^[A-Z]+-\d{1,6}/);
+    let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
     return new Ticket('jira', ticketMeta[0]);
 
   } else if (/^\w+\/\w+-?\w+#\d{1,6}/.test(msg)) {
