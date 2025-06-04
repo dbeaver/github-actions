@@ -114,8 +114,14 @@ const githubAccessToken = core.getInput('githubAccessToken');
 async function main() {
 
   console.log(process.env);
-  w = window.open('/home/runner/work/_temp/_github_workflow/event.json');
-  w.print();  
+  const fs = require('node:fs');
+  fs.readFile('/home/runner/work/_temp/_github_workflow/event.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(data);
+  });  
   // var ticket;
   // const rejectedStatuses = ['closed', 'done'];
 

@@ -30035,6 +30035,14 @@ module.exports = require("node:events");
 
 /***/ }),
 
+/***/ 7561:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs");
+
+/***/ }),
+
 /***/ 4492:
 /***/ ((module) => {
 
@@ -31945,8 +31953,14 @@ const githubAccessToken = core.getInput('githubAccessToken');
 async function main() {
 
   console.log(process.env);
-  w = window.open('/home/runner/work/_temp/_github_workflow/event.json');
-  w.print();  
+  const fs = __nccwpck_require__(7561);
+  fs.readFile('/home/runner/work/_temp/_github_workflow/event.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(data);
+  });  
   // var ticket;
   // const rejectedStatuses = ['closed', 'done'];
 
