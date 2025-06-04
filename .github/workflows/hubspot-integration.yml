@@ -1,0 +1,15 @@
+name: "HubSpot Integration"
+
+on:
+  issue_comment:
+    types: [created, deleted]
+
+jobs:
+  hubspot-integration:
+    runs-on: ubuntu-latest
+    steps:     
+      - name: HubSpot Integration Launcher
+        uses: dbeaver/github-actions/hubspot-integration@hubspot-integration
+        with:
+          hubspotToken: ${{ secrets.HUBSPOT_TOKEN }}
+
