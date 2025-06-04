@@ -31952,17 +31952,23 @@ const githubAccessToken = core.getInput('githubAccessToken');
 
 async function main() {
 
+  var event;
+
   console.log(process.env);
   const fs = __nccwpck_require__(7561);
-  fs.readFile('/home/runner/work/_temp/_github_workflow/event.json', 'utf8', (err, data) => {
+  fs.readFile(process.env.GITHUB_EVENT_PATH, 'utf8', (err, data) => {
     if (err) {
       console.error(err);
-      return;
+      process.exit(1);
     }
-    console.log(data);
+    event = JSON.parse(data);
   });  
-  // var ticket;
-  // const rejectedStatuses = ['closed', 'done'];
+
+  console.log('==================');
+  console.log(github.context.payload.organization.login);
+  console.log('==================');
+  console.log(github.context.payload);
+
 
   // const token = core.getInput('curRepoToken');
   // const octokit = new github.getOctokit(token);
