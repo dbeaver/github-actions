@@ -30035,14 +30035,6 @@ module.exports = require("node:events");
 
 /***/ }),
 
-/***/ 7561:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("node:fs");
-
-/***/ }),
-
 /***/ 4492:
 /***/ ((module) => {
 
@@ -31862,159 +31854,45 @@ const githubAccessToken = core.getInput('githubAccessToken');
 //           `
 
 
-// async function requestIssue(ticket) {
+async function hs_request(req, data) {
 
-//   let authToken = githubAccessToken;
-//   let authMethod = 'Basic'
+  let authToken = githubAccessToken;
+  let authMethod = 'Bearer'
 
-//   if (ticket.board == 'hubspot') {
-//     authToken = hubspotAccessToken;
-//     authMethod = 'Basic';
-//   }
+  const response = await fetch(req, {
+    method: 'POST',
+    body: data,
+    headers: {
+      'Authorization': `${authMethod} ${Buffer.from(
+        authToken
+      ).toString('base64')}`,
+      'Accept': 'application/json'
+    }
+  });
+  if (!response.ok) {
+    const message = `An error has occured: ${response.status} ${response.statusText}`;
+    core.setFailed(message);
+  }  
+  const json = await response.json();
 
-
-//   const response = await fetch(ticket.ticketUri(), {
-//     method: 'GET',
-//     headers: {
-//       'Authorization': `${authMethod} ${Buffer.from(
-//         authToken
-//       ).toString('base64')}`,
-//       'Accept': 'application/json'
-//     }
-//   });
-//   if (!response.ok) {
-//     console.error(errorMsg);
-//     const message = `An error has occured: ${ticket.ticketUri()}: ${response.status} ${response.statusText}`;
-//     core.setFailed(message);
-//   }  
-//   const json = await response.json();
-
-//   return json;
-// }
-
-
-// function msgBelongsTo(msg) {
-
-//   if (msg.charAt(0) == "#") {
-//     let ticketID = msg.match(/^#(\d+)/)[1];
-//     let board = process.env.GITHUB_REPOSITORY;
-//     return new Ticket(board, ticketID);
-  
-//   } else if (msg.substring(0, 2).toLowerCase() == "cb") {
-//     let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
-//     return new Ticket('hubspot', ticketMeta[0]);
-
-//   // } else if (msg.substring(0, 2).toLowerCase() == "db") {
-//   //   let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
-//   //   return new Ticket('hubspot', ticketMeta[0]);
-
-//   } else if (msg.substring(0, 3).toLowerCase() == "web") {
-//     let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
-//     return new Ticket('hubspot', ticketMeta[0]);
-
-//   } else if (/^\w+\/\w+-?\w+#\d{1,6}/.test(msg)) {
-//     let ticketMeta = msg.match(/^(\w+\/\w+-?\w+)#(\d{1,6})/);
-//     // ticketMeta[1] = board
-//     // ticketMeta[2] = ticket ID
-//     return new Ticket(ticketMeta[1].trim(), ticketMeta[2].trim())
-//   }
-//   return 'Unknown repo';
-// }
-
-
-// class Ticket {
-//   constructor(board, ID) {
-//     this.board = board;
-//     this.ID = ID;
-//     this.status = null
-//   }
-
-//   ticketUri() {
-//     if (this.board == 'hubspot') {
-//       return hubspotUssueApi + this.ID;
-//     }
-//     return githubUssueApi + this.board + '/issues/' + this.ID;
-//   }
-
-//   async setStatus() {
-//     const status = await requestIssue(this);
-//     if (this.board == 'hubspot') {
-//       this.status = status.fields.status.name;
-//     } else {
-//       this.status = status.state;
-//     }
-//   }
-
-//   getStatus() {
-//     return this.status;
-//   }
-// }
+  return json;
+}
 
 async function main() {
 
-  var event;
-
-  console.log(process.env);
-  const fs = __nccwpck_require__(7561);
-  fs.readFile(process.env.GITHUB_EVENT_PATH, 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    event = JSON.parse(data);
-  });  
-
-  console.log('==================');
-  console.log(github.context.payload.organization.login);
-  console.log('==================');
-  console.log(github.context.payload);
-
+  const context = github.context.payload;
 
   // const token = core.getInput('curRepoToken');
   // const octokit = new github.getOctokit(token);
-  // const { data: listCommits } = await octokit.rest.pulls.listCommits({
+  // const { data: issue } = await octokit.rest.issues.get({
   //     owner: github.context.payload.organization.login,
   //     repo: github.context.payload.repository.name,
-  //     pull_number: github.context.payload.number
+  //     issue_number: github.context.payload.number
   // });
-  // const lastCommit = listCommits.slice(0);
-  // console.log(lastCommit[0].commit.message);
-  // const lastCommitMessage = lastCommit[0].commit.message.trim();
-  
-  // if (!lastCommitMessage) {
-  //   core.setFailed('Empty commit message.');
-  // }
 
-  // const patterns = lastCommitMessage.match(commitMsgTemplate);
-  // console.log(patterns)
-  
-  // if (patterns === null) { 
-  //   console.error(errorMsg);
-  //   core.setFailed('Commit message validation failed.');
-  //   process.exit(1);
-  // }
-
-  // if (patterns[0] === 'Merge') {
-  //   process.exit(0);
-  // } else if (patterns[0]) {
-  //   ticket = msgBelongsTo(patterns[0]);
-  // } else {
-  //   console.error(errorMsg);
-  //   core.setFailed('Commit message validation failed.');
-  // }
-
-  // if (ticket) {
-  //   await ticket.setStatus();
-  //   console.log('Ticket status: ' + ticket.status)
-  // }
-  // if (ticket) {
-  //   if (rejectedStatuses.includes(ticket.status)) {
-  //     const closedMessage = `Ticket ${ticket.board} ${ticket.ID} has status: ${ticket.status}.`;
-  //     throw new Error(closedMessage);
-  //   } else {
-  //     console.log("All fine")
-  //   }
-  // }
+  var searchRequest = { "inputs": [{ "id": context.issue.url }]}
+  const hs_search_request = await hs_request(hubspotUssueApi, searchRequest);
+  console.log(hs_search_request)
 }
 
 main()
