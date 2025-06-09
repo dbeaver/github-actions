@@ -62,10 +62,10 @@ async function main() {
   const searchResponse = await hs_request(hubspotUssueApi, searchRequestString);
   
   console.log(searchResponse)
-  // if ('errors' in searchResponse) {
-  //   console.log("HubSport will not be notifyed:");
-  //   console.log(searchResponse.errors[0].message);
-  // }
+  if ('errors' in searchResponse) {
+    console.log("HubSport will not be notifyed:");
+    console.log(searchResponse.errors[0].message);
+  }
 }
 
 main()
