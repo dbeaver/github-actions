@@ -59,7 +59,8 @@ async function main() {
                               "idProperty": "issue_url",
                               "properties": ["status", "milestone", "title"]}`;
 
-  const hs_search_request = await hs_request(hubspotUssueApi, searchRequestString);
+  const searchResponse = await hs_request(hubspotUssueApi, searchRequestString);
+  var searchResponseData = searchResponse.data;
   
   if ('errors' in hs_search_request.data) {
     console.log("HubSport will not be notifyed:");
