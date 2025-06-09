@@ -59,7 +59,7 @@ async function main() {
   //     issue_number: github.context.payload.number
   // });
 
-  var searchRequestString = `{"inputs": [{ "id": ${context.issue.url} }]}`
+  var searchRequestString = `{"inputs": [{ "id": "${context.issue.url}" }]}`
   const searchRequestJson = JSON.parse(searchRequestString);
   const hs_search_request = await hs_request(hubspotUssueApi, searchRequestJson);
   console.log(hs_search_request)
