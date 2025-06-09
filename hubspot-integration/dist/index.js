@@ -31918,7 +31918,7 @@ async function main() {
               "id": \"${searchResponse.results[0].id}\",
               "properties": {
                   "status": \"${context.issue.state}\",
-                  "milestone": \"${context.action == 'demilestoned' ? 'demilestoned' : milestone}\",
+                  "milestone": \"${context.action == 'demilestoned' ? 'removed' : milestone}\",
                   "title": \"${context.issue.title}\"
               }}]}`
     console.log('====================================');
