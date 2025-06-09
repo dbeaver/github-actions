@@ -80,7 +80,7 @@ async function main() {
               "id": \"${searchResponse.results[0].id}\",
               "properties": {
                   "status": \"${context.issue.state}\",
-                  "milestone": \"${context.issue.milestone.title}\",
+                  "milestone": \"${demilestoned.action == 'demilestoned' ? 'demilestoned' : context.issue.milestone.title}\",
                   "title": \"${context.issue.title}\"
               }}]}`
     console.log('====================================');
