@@ -47,6 +47,7 @@ async function hs_request(req, data) {
 async function main() {
 
   const context = github.context.payload;
+  console.log(context)
 
   // const token = core.getInput('curRepoToken');
   // const octokit = new github.getOctokit(token);
@@ -64,6 +65,7 @@ async function main() {
 
   const searchResponse = await hs_request(hubspotSearchUssueApi, searchRequestString);
   
+  console.log('====================================');
   console.log(searchResponse)
   if ('errors' in searchResponse) {
     console.log("HubSport will not be notifyed:");
