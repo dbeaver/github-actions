@@ -55,7 +55,7 @@ async function main() {
   //     issue_number: github.context.payload.number
   // });
 
-  var searchRequestString = `{"inputs": [{ "id": \"${context.issue.url}\" }], "idProperty": "issue_url"}`;
+  var searchRequestString = `{"inputs": [{ "id": \"${context.issue.html_url}\" }], "idProperty": "issue_url"}`;
   console.log(searchRequestString);
   const searchRequestJson = JSON.parse(searchRequestString);
   console.log(searchRequestJson);
