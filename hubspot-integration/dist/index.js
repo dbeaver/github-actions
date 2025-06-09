@@ -31907,7 +31907,7 @@ async function main() {
 
     let milestone;
     if (context.issue.milestone == null) {
-      let milestone = 'undefined'
+      let milestone = 'undefined.'
     } else {
       let milestone = context.issue.milestone.title
     }
