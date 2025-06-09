@@ -11,19 +11,6 @@ const hubspotAccessToken = core.getInput('hubspotToken');
 const githubAccessToken = core.getInput('githubAccessToken');
 
 
-// const errorMsg = `
-//             Each commit message must begin with GitHub or hubspot ticket reference. Like:
-//             *  #<issue_number>
-//             *  org/repo#<issue_number>
-//             *  DB-Number (hubspot)
-//             *  CB-Number (hubspot)
-//             *  WEB-Number (hubspot)
-
-//             For how to rename your commit message, follow this GitHub Doc:
-//             https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/changing-a-commit-message
-//           `
-
-
 async function hs_request(req, data) {
 
   const response = await fetch(req, {
@@ -47,15 +34,7 @@ async function hs_request(req, data) {
 async function main() {
 
   const context = github.context.payload;
-  console.log(context)
-
-  // const token = core.getInput('curRepoToken');
-  // const octokit = new github.getOctokit(token);
-  // const { data: issue } = await octokit.rest.issues.get({
-  //     owner: github.context.payload.organization.login,
-  //     repo: github.context.payload.repository.name,
-  //     issue_number: github.context.payload.number
-  // });
+  // console.log(context)
 
   var searchRequestString = `{"inputs": [{"id": \"${context.issue.html_url}\" }],
                               "idProperty": "issue_url",
@@ -65,8 +44,8 @@ async function main() {
 
   const searchResponse = await hs_request(hubspotSearchUssueApi, searchRequestString);
 
-  console.log('====================================');
-  console.log(searchResponse)
+  // console.log('====================================');
+  // console.log(searchResponse)
   if ('errors' in searchResponse) {
     console.log("HubSport will not be notifyed:");
     core.warning(searchResponse.errors[0].message);
@@ -89,11 +68,11 @@ async function main() {
                   "status": \"${context.issue.state}\",
                   "milestone": \"${context.action == 'demilestoned' ? 'removed' : milestone}\",
                   "title": \"${context.issue.title}\"
-              }}]}`
-    console.log('====================================');
-    console.log(UpdateReqString);
+              }}]}`;
+    // console.log('====================================');
+    // console.log(UpdateReqString);
     const updateResponse = await hs_request(hubspotUssueUpdateApi, UpdateReqString);
-    console.log('====================================');
+    // console.log('====================================');
     console.log(updateResponse);
   }
 }
