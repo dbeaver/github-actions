@@ -31835,7 +31835,8 @@ const github = __nccwpck_require__(7364);
 const asyncFunction = (t) => new Promise(resolve => setTimeout(resolve, t));
 
 
-const hubspotUssueApi = "https://api.hubapi.com/crm/v3/objects/2-44421436/batch/read?archive=false";
+const hubspotSearchUssueApi = "https://api.hubapi.com/crm/v3/objects/2-44421436/batch/read?archive=false";
+const hubspotUssueUpdateApi ="https://api.hubapi.com/crm/v3/objects/2-44421436/batch/update"
 
 const hubspotAccessToken = core.getInput('hubspotToken');
 const githubAccessToken = core.getInput('githubAccessToken');
@@ -31890,12 +31891,30 @@ async function main() {
                               "idProperty": "issue_url",
                               "properties": ["status", "milestone", "title"]}`;
 
-  const searchResponse = await hs_request(hubspotUssueApi, searchRequestString);
+
+
+  const searchResponse = await hs_request(hubspotSearchUssueApi, searchRequestString);
   
   console.log(searchResponse)
   if ('errors' in searchResponse) {
     console.log("HubSport will not be notifyed:");
-    console.log(searchResponse.errors[0].message);
+    core.warning(searchResponse.errors[0].message);
+  }
+
+  if (typeof searchResponse.results !== 'undefined' && searchResponse.results.length > 0) {
+
+    var UpdateReqString = `{
+      "inputs": [
+          {
+              "id": \"${searchResponse.results.id}\",
+              "properties": {
+                  "status": \"${context.issue.state}\",
+                  "milestone": \"${context.issue.milestone}\",
+                  "title": \"${context.issue.title}\"
+              }}]}`
+
+      const updateResponse = await hs_request(hubspotUssueUpdateApi, UpdateReqString);
+      console.log(updateResponse);
   }
 }
 
