@@ -37,7 +37,7 @@ async function hs_request(req, data) {
   if (!response.ok) {
     const message = `An error has occured: ${response.status} ${response.statusText}`;
     core.setFailed(message);
-  }  
+  }
   const json = await response.json();
 
   return json;
@@ -58,11 +58,13 @@ async function main() {
   var searchRequestString = `{"inputs": [{"id": \"${context.issue.html_url}\" }],
                               "idProperty": "issue_url",
                               "properties": ["status", "milestone", "title"]}`;
-  console.log(searchRequestString);
-  const searchRequestJson = JSON.parse(searchRequestString);
-  console.log(searchRequestJson);
+
   const hs_search_request = await hs_request(hubspotUssueApi, searchRequestString);
-  console.log(hs_search_request)
+  
+  if ('errors' in hs_search_request.data) {
+    console.log("HubSport will not be notifyed:");
+    console.log(hs_search_request.data.errors[0].message);
+  }
 }
 
 main()
