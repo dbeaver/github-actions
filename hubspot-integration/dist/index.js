@@ -31906,7 +31906,7 @@ async function main() {
   if (typeof searchResponse.results !== 'undefined' && searchResponse.results.length > 0) {
 
     let milestone;
-    if (typeof context.issue.milestone == 'undefined') {
+    if (typeof context.issue.milestone == null ) {
       let milestone = 'undefined'
     } else {
       let milestone = context.issue.milestone.title
