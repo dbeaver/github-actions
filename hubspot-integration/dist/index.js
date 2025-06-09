@@ -31890,8 +31890,10 @@ async function main() {
   //     issue_number: github.context.payload.number
   // });
 
-  var searchRequestString = `{"inputs": [{ "id": \"${context.issue.url}\" }]}`
+  var searchRequestString = `{"inputs": [{ "id": \"${context.issue.url}\" }]}`;
+  console.log(searchRequestString);
   const searchRequestJson = JSON.parse(searchRequestString);
+  console.log(searchRequestJson);
   const hs_search_request = await hs_request(hubspotUssueApi, searchRequestJson);
   console.log(hs_search_request)
 }
