@@ -62,7 +62,8 @@ async function main() {
   const searchResponse = await hs_request(hubspotUssueApi, searchRequestString);
   var searchResponseData = searchResponse.data;
   
-  if ('errors' in hs_search_request.data) {
+  console.log(searchResponseData)
+  if ('errors' in searchResponseData) {
     console.log("HubSport will not be notifyed:");
     console.log(hs_search_request.data.errors[0].message);
   }
