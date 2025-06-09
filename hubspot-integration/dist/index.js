@@ -31890,13 +31890,13 @@ async function main() {
                               "idProperty": "issue_url",
                               "properties": ["status", "milestone", "title"]}`;
 
-  const { data: searchResponse } = await hs_request(hubspotUssueApi, searchRequestString);
+  const searchResponse = await hs_request(hubspotUssueApi, searchRequestString);
   
   console.log(searchResponse)
-  if ('errors' in searchResponse) {
-    console.log("HubSport will not be notifyed:");
-    console.log(searchResponse.errors[0].message);
-  }
+  // if ('errors' in searchResponse) {
+  //   console.log("HubSport will not be notifyed:");
+  //   console.log(searchResponse.errors[0].message);
+  // }
 }
 
 main()
