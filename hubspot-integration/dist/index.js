@@ -31866,7 +31866,8 @@ async function hs_request(req, data) {
       'Authorization': `${authMethod} ${Buffer.from(
         authToken
       ).toString('base64')}`,
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
     }
   });
   if (!response.ok) {
