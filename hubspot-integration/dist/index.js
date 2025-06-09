@@ -31905,13 +31905,20 @@ async function main() {
 
   if (typeof searchResponse.results !== 'undefined' && searchResponse.results.length > 0) {
 
+    let milestone;
+    if (typeof context.issue.milestone == 'undefined') {
+      let milestone = 'undefined'
+    } else {
+      let milestone = context.issue.milestone.title
+    }
+
     var UpdateReqString = `{
       "inputs": [
           {
               "id": \"${searchResponse.results[0].id}\",
               "properties": {
                   "status": \"${context.issue.state}\",
-                  "milestone": \"${context.action == 'demilestoned' ? 'demilestoned' : context.issue.milestone.title}\",
+                  "milestone": \"${context.action == 'demilestoned' ? 'demilestoned' : milestone}\",
                   "title": \"${context.issue.title}\"
               }}]}`
     console.log('====================================');
