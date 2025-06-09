@@ -31912,9 +31912,11 @@ async function main() {
                   "milestone": \"${context.issue.milestone}\",
                   "title": \"${context.issue.title}\"
               }}]}`
-
-      const updateResponse = await hs_request(hubspotUssueUpdateApi, UpdateReqString);
-      console.log(updateResponse);
+    console.log('====================================');
+    console.log(UpdateReqString);
+    const updateResponse = await hs_request(hubspotUssueUpdateApi, UpdateReqString);
+    console.log('====================================');
+    console.log(updateResponse);
   }
 }
 
