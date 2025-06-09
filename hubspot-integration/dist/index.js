@@ -31856,16 +31856,11 @@ const githubAccessToken = core.getInput('githubAccessToken');
 
 async function hs_request(req, data) {
 
-  let authToken = githubAccessToken;
-  let authMethod = 'Bearer'
-
   const response = await fetch(req, {
     method: 'POST',
     body: data,
     headers: {
-      'Authorization': `${authMethod} ${Buffer.from(
-        authToken
-      ).toString('base64')}`,
+      'Authorization': `Bearer ${hubspotAccessToken}`,
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     }
