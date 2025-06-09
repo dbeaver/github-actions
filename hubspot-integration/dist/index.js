@@ -31895,7 +31895,7 @@ async function main() {
 
 
   const searchResponse = await hs_request(hubspotSearchUssueApi, searchRequestString);
-  
+
   console.log('====================================');
   console.log(searchResponse)
   if ('errors' in searchResponse) {
@@ -31906,7 +31906,7 @@ async function main() {
   if (typeof searchResponse.results !== 'undefined' && searchResponse.results.length > 0) {
 
     let milestone;
-    if (typeof context.issue.milestone == null ) {
+    if (context.issue.milestone == null) {
       let milestone = 'undefined'
     } else {
       let milestone = context.issue.milestone.title
