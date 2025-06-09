@@ -31906,7 +31906,7 @@ async function main() {
     var UpdateReqString = `{
       "inputs": [
           {
-              "id": \"${searchResponse.results.id}\",
+              "id": \"${searchResponse.results[0].id}\",
               "properties": {
                   "status": \"${context.issue.state}\",
                   "milestone": \"${context.issue.milestone}\",
