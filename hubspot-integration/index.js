@@ -55,11 +55,13 @@ async function main() {
   //     issue_number: github.context.payload.number
   // });
 
-  var searchRequestString = `{"inputs": [{"id": \"${context.issue.html_url}\" }], "idProperty": "issue_url", "properties": ["status", "milestone", "title"]}`;
+  var searchRequestString = `{"inputs": [{"id": \"${context.issue.html_url}\" }],
+                              "idProperty": "issue_url",
+                              "properties": ["status", "milestone", "title"]}`;
   console.log(searchRequestString);
   const searchRequestJson = JSON.parse(searchRequestString);
   console.log(searchRequestJson);
-  const hs_search_request = await hs_request(hubspotUssueApi, searchRequestJson);
+  const hs_search_request = await hs_request(hubspotUssueApi, searchRequestString);
   console.log(hs_search_request)
 }
 
