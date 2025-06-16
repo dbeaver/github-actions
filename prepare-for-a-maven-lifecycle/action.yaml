@@ -1,0 +1,35 @@
+name: "Prepare for running a Maven lifecycle"
+description: "Prepares to run a Maven lifecycle by cloning the repo and its dependencies and installing OpenJDK and Maven"
+
+inputs:
+  token:
+    default: ${{ github.token }}
+    description: "A GitHub token to use for cloning repositories"
+  project-deps:
+    required: false
+    description: "Path to a file with project dependencies to clone. If not provided, the action will only clone the current repository."
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set repository path variable
+      run: echo "CHECKOUT_PATH=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+      shell: bash
+
+    - uses: actions/checkout@v4
+      with:
+        path: ${{ env.CHECKOUT_PATH || '.' }}
+
+    - uses: dbeaver/github-actions/clone-repositories@devel
+      if: ${{ inputs.project-deps != null }}
+      with:
+        project_deps_path: ${{ inputs.project-deps }}
+        token: ${{ inputs.token }}
+
+    - uses: dbeaver/github-actions/install-maven@devel
+
+    - uses: actions/setup-java@v4
+      with:
+        distribution: "temurin"
+        java-version: "21"
+        cache: maven
