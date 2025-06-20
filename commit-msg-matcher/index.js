@@ -6,7 +6,7 @@ const github = require('@actions/github');
 
 const asyncFunction = (t) => new Promise(resolve => setTimeout(resolve, t));
 
-const commitMsgTemplate = /^#\d+|^[cdwebCDWEB]+-\d+|^\w+\/\w+-?\w+#\d{1,6}|^Merge/gi;
+const commitMsgTemplate = /^#\d+|^[cdwebCDWEB]+-\d+|^\w+\/\w+-?\w+-?\w+#\d{1,6}|^Merge/gi;
 
 const jiraUssueApi = "https://dbeaver.atlassian.net/rest/api/2/issue/";
 const githubUssueApi = "https://api.github.com/repos/";
