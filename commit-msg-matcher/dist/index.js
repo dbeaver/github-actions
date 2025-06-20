@@ -31171,7 +31171,7 @@ function msgBelongsTo(msg) {
     let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
     return new Ticket('jira', ticketMeta[0]);
 
-  } else if (/^\w+\/\w+-?\w+#\d{1,6}/.test(msg)) {
+  } else if (/^\w+\/\w+-?\w+-?\w+#\d{1,6}/.test(msg)) {
     let ticketMeta = msg.match(/^(\w+\/\w+-?\w+)#(\d{1,6})/);
     // ticketMeta[1] = board
     // ticketMeta[2] = ticket ID
