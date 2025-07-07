@@ -8,6 +8,10 @@ inputs:
   project-deps:
     required: false
     description: "Path to a file with project dependencies to clone. If not provided, the action will only clone the current repository."
+  cache-dependency-path:
+    required: false
+    description: "See the `cache-dependency-path` input in the `actions/setup-java` action documentation."
+    default: "**/pom.xml"
 
 runs:
   using: "composite"
@@ -33,3 +37,4 @@ runs:
         distribution: "temurin"
         java-version: "21"
         cache: maven
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
