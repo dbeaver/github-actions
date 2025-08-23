@@ -1,0 +1,23 @@
+name: Branch info
+description: Gathers facts about the current branch of the repo where an action was triggered
+
+# Huge thanks to the authors of this article:
+# https://www.baeldung.com/ops/github-actions-get-current-branch
+
+outputs:
+  branch_name:
+    description: "The name of the branch where the action was triggered"
+    value: ${{ steps.branch-info.outputs.branch-name }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Gather branch info
+      id: branch-info
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          echo "branch-name=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+        else
+          echo "branch-name=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
