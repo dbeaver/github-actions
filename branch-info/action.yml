@@ -5,7 +5,7 @@ description: Gathers facts about the current branch of the repo where an action 
 # https://www.baeldung.com/ops/github-actions-get-current-branch
 
 outputs:
-  branch_name:
+  branch-name:
     description: "The name of the branch where the action was triggered"
     value: ${{ steps.branch-info.outputs.branch-name }}
 
