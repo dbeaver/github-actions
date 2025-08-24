@@ -29,4 +29,5 @@ runs:
         token: ${{ inputs.token }}
 
     - name: Provide debugging info
+      shell: sh
       run: pwd && ls -lah
