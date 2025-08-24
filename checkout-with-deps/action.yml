@@ -1,0 +1,31 @@
+name: "Checkout with dependencies"
+description: "Checks out a repo along with its dependencies listed in project.deps"
+
+inputs:
+  repo:
+    description: "The repository to checkout"
+    required: true
+  ref:
+    description: "See the qequivalent input of actions/checkout for reference"
+    required: false
+  token:
+    default: ${{ github.token }}
+    description: "A GitHub token to use for cloning repositories"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout base repo
+      uses: actions/checkout@v5
+      with:
+        repository: ${{ inputs.repo }}
+        ref: ${{ inputs.ref }}
+        token: ${{ inputs.token }}
+      run: ls -lah # For debugging purposes
+
+    - name: Checkout dependencies
+      uses: dbeaver/github-actions/clone-repositories@devel
+      with:
+        project_deps_path: ${{ inputs.repo }}/project.deps
+        token: ${{ inputs.token }}
+      run: ls -lah # For debugging purposes
