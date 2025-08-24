@@ -21,11 +21,12 @@ runs:
         repository: ${{ inputs.repo }}
         ref: ${{ inputs.ref }}
         token: ${{ inputs.token }}
-      run: ls -lah # For debugging purposes
 
     - name: Checkout dependencies
       uses: dbeaver/github-actions/clone-repositories@devel
       with:
         project_deps_path: ${{ inputs.repo }}/project.deps
         token: ${{ inputs.token }}
-      run: ls -lah # For debugging purposes
+
+    - name: Provide debugging info
+      run: pwd && ls -lah
