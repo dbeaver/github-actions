@@ -2,6 +2,9 @@ name: "Checkout with dependencies"
 description: "Checks out a repo along with its dependencies listed in project.deps"
 
 inputs:
+  org-or-user:
+    description: "The organization or user that owns the repository to checkout."
+    required: true
   repo:
     description: "The repository to checkout"
     required: true
@@ -18,9 +21,10 @@ runs:
     - name: Checkout base repo
       uses: actions/checkout@v5
       with:
-        repository: ${{ inputs.repo }}
+        repository: ${{ inputs.org-or-user }}/${{ inputs.repo }}
         ref: ${{ inputs.ref }}
         token: ${{ inputs.token }}
+        path: ${{ inputs.repo }}
 
     - name: Provide debugging info (0)
       shell: sh
