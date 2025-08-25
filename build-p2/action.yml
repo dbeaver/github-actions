@@ -11,9 +11,9 @@ runs:
     - name: Verify target-bundles
       shell: sh
       run: mvn clean verify -B -T1C
-      working-directory: ${{ inputs.repo-root-dir || env.CHECKOUT_PATH || '.' }}
+      working-directory: ${{ inputs.repo-root-dir || '.' }}
 
     - name: Verify P2
       shell: sh
       run: mvn clean verify -B -T1C
-      working-directory: ${{ inputs.repo-root-dir || env.CHECKOUT_PATH || '.' }}/p2
+      working-directory: ${{ inputs.repo-root-dir || '.' }}/p2
