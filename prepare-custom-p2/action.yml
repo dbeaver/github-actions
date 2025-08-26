@@ -5,6 +5,9 @@ inputs:
   repo:
     description: "The repository to check out the custom p2 from"
     required: true
+  token:
+    default: ${{ github.token }}
+    description: "A GitHub token to use for cloning repositories"
 
 outputs:
   p2-found:
@@ -36,7 +39,7 @@ runs:
       uses: dbeaver/github-actions/checkout-with-deps@dbeaver/dbeaver-devops#2023-custom-p2 # CHANGEME after PR approval
       if: ${{ steps.find-p2.outputs.p2-found == 'true' }}
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ inputs.token }}
         owner: ${{ github.repository_owner }}
         repo: ${{ inputs.repo }}
         ref: ${{ github.head_ref }}
