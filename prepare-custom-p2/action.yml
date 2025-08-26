@@ -1,0 +1,48 @@
+name: Prepare custom p2
+description: Prepares a custom p2 repository. Intended to be run from a PR only.
+
+inputs:
+  repo:
+    description: "The repository to check out the custom p2 from"
+    required: true
+
+outputs:
+  p2-found:
+    description: "Whether a custom p2 repository for the current branch was found"
+    value: ${{ steps.find-p2.outputs.p2-found }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Find p2
+      id: find-p2
+      shell: bash
+      env:
+        REPO: ${{ inputs.repo }}
+      run: |
+        uri_encoded_branch_name=$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$GITHUB_HEAD_REF")
+        echo "uri_encoded_branch_name=$uri_encoded_branch_name"
+        http_status=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY_OWNER/$REPO/branches/$uri_encoded_branch_name")
+        echo "httpstatus=$http_status"
+        if [ "$http_status" = '200' ]; then
+          echo "p2-found=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "p2-found=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Checkout p2 and its dependencies
+      uses: dbeaver/github-actions/checkout-with-deps@dbeaver/dbeaver-devops#2023-custom-p2 # CHANGEME after PR approval
+      if: ${{ steps.find-p2.outputs.p2-found == 'true' }}
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        owner: ${{ github.repository_owner }}
+        repo: ${{ inputs.repo }}
+        ref: ${{ github.head_ref }}
+
+    - name: Build custom p2
+      uses: dbeaver/github-actions/build-p2@dbeaver/dbeaver-devops#2023-custom-p2 # CHANGEME after PR approval
+      if: ${{ steps.find-p2.outputs.p2-found == 'true' }}
+      with:
+        repo-root-dir: ./${{ inputs.repo }}
