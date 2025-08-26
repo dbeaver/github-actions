@@ -26,16 +26,8 @@ runs:
         token: ${{ inputs.token }}
         path: ${{ inputs.repo }}
 
-    - name: Provide debugging info (0)
-      shell: sh
-      run: pwd && ls -lah
-
     - name: Checkout dependencies
       uses: dbeaver/github-actions/clone-repositories@devel
       with:
         project_deps_path: ${{ inputs.repo }}/project.deps
         token: ${{ inputs.token }}
-
-    - name: Provide debugging info (1)
-      shell: sh
-      run: pwd && ls -lah
