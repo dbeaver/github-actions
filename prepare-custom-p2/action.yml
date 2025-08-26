@@ -5,14 +5,17 @@ inputs:
   repo:
     description: "The repository to check out the custom p2 from"
     required: true
+  mvn-property:
+    description: "The Maven property to set the custom p2 repository URL to"
+    required: true
   token:
     default: ${{ github.token }}
     description: "A GitHub token to use for cloning repositories"
 
 outputs:
-  p2-found:
-    description: "Whether a custom p2 repository for the current branch was found"
-    value: ${{ steps.find-p2.outputs.p2-found }}
+  mvn-flag:
+    description: "The Maven flag to use to set the custom p2 repository URL"
+    value: ${{ steps.set-mvn-glag.outputs.mvn-flag || '' }}
 
 runs:
   using: "composite"
@@ -49,3 +52,11 @@ runs:
       if: ${{ steps.find-p2.outputs.p2-found == 'true' }}
       with:
         repo-root-dir: ./${{ inputs.repo }}
+
+    - name: Set mvn-flag output
+      if: ${{ steps.find-p2.outputs.p2-found == 'true' }}
+      id: set-mvn-flag
+      shell: bash
+      run: |
+        p2_uri="file://$(realpath ./${{ inputs.repo }}/p2/repository/target/repository)"
+        echo "mvn-flag=-D${{ inputs.mvn-property }}=$p2_uri" >> "$GITHUB_OUTPUT"
