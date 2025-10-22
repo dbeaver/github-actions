@@ -6,7 +6,7 @@ const github = require('@actions/github');
 
 const asyncFunction = (t) => new Promise(resolve => setTimeout(resolve, t));
 
-const commitMsgTemplate = /^#\d+|^[cdwebCDWEB]+-\d+|^\w+\/\w+-?\w+-?\w+#\d{1,6}|^Merge/gi;
+const commitMsgTemplate = /^#\d+|^[cdwebhiCDWEBHI]+-\d+|^\w+\/\w+-?\w+-?\w+#\d{1,6}|^Merge/gi;
 
 const jiraUssueApi = "https://dbeaver.atlassian.net/rest/api/2/issue/";
 const githubUssueApi = "https://api.github.com/repos/";
@@ -21,7 +21,8 @@ const errorMsg = `
             *  org/repo#<issue_number>
             *  DB-Number (Jira)
             *  CB-Number (Jira)
-            *  WEB-Number (Jira)
+            *  WEB-Number (Jira or HubSpot Integration)
+            *  HI-Number (HubSpot Integration)
 
             For how to rename your commit message, follow this GitHub Doc:
             https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/changing-a-commit-message
@@ -74,7 +75,8 @@ function msgBelongsTo(msg) {
   //   let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
   //   return new Ticket('jira', ticketMeta[0]);
 
-  } else if (msg.substring(0, 3).toLowerCase() == "web") {
+  } else if (msg.substring(0, 3).toLowerCase() == "web" || 
+             msg.substring(0, 2).toLowerCase() == "hi" ) {
     let ticketMeta = msg.match(/^[a-zA-Z]+-\d{1,6}/);
     return new Ticket('jira', ticketMeta[0]);
 
