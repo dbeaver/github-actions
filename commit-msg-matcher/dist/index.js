@@ -31131,6 +31131,11 @@ async function requestIssue(ticket) {
     authToken = jiraAccessToken;
     authMethod = 'Basic';
   }
+
+  if (ticket.board == 'dbeaver/dbeaver') {
+    authToken = core.getInput('curRepoToken');
+  }
+
   const response = await fetch(ticket.ticketUri(), {
     method: 'GET',
     headers: {
