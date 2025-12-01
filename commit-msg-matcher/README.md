@@ -1,5 +1,5 @@
 # Rebuild this Action 
 ```
-nmp install
+npm install
 ncc build index.js
 ```

@@ -32,14 +32,12 @@ const errorMsg = `
 async function requestIssue(ticket) {
 
   let authToken = githubAccessToken;
-  let authMethod = 'Basic'
+  let authMethod = 'Bearer'
 
   if (ticket.board == 'jira') {
     authToken = jiraAccessToken;
     authMethod = 'Basic';
   }
-
-
   const response = await fetch(ticket.ticketUri(), {
     method: 'GET',
     headers: {
