@@ -1,11 +1,11 @@
 inputs:
   githubAccessToken:
     description: 'you must provide GITHUB_TOKEN'
-    required: false
+    required: true
     default: null
   jiraAccessToken:
     description: 'you must provide JIRA_TOKEN'
-    required: false
+    required: true
     default: null
   curRepoToken:
     description: 'Get current repo context'
