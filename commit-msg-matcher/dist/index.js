@@ -31136,7 +31136,7 @@ async function requestIssue(ticket) {
     authToken = core.getInput('curRepoToken');
   }
 
-  console.log("Get ticket status: URI: " + ticket.ticketUri() + "Auth method: " + authMethod)
+  console.log("Get ticket status: URI: " + ticket.ticketUri() + " Auth method: " + authMethod)
   const response = await fetch(ticket.ticketUri(), {
     method: 'GET',
     headers: {
