@@ -39,7 +39,7 @@ async function requestIssue(ticket) {
     authMethod = 'Basic';
   }
 
-  if (ticket.board == 'dbeaver/dbeaver') {
+  if (ticket.board == 'dbeaver/dbeaver' || ticket.board == 'dbeaver/cloudbeaver' ) {
     authToken = core.getInput('curRepoToken');
   }
 
