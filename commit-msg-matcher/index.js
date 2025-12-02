@@ -54,7 +54,7 @@ async function requestIssue(ticket) {
   });
   if (!response.ok) {
     console.error(errorMsg);
-    const message = `An error has occured: ${ticket.ticketUri()}: ${response.status} ${response.statusText}`;
+    const message = `An error has occured: ${ticket.ticketUri()} has ${response.status} ${response.statusText}`;
     core.setFailed(message);
   }  
   const json = await response.json();
