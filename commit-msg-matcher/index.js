@@ -35,7 +35,9 @@ async function requestIssue(ticket) {
   let authMethod = 'Bearer'
 
   if (ticket.board == 'jira') {
-    authToken = jiraAccessToken;
+    authToken = Buffer.from(
+        jiraAccessToken
+      ).toString('base64');
     authMethod = 'Basic';
   }
 
@@ -47,9 +49,7 @@ async function requestIssue(ticket) {
   const response = await fetch(ticket.ticketUri(), {
     method: 'GET',
     headers: {
-      'Authorization': `${authMethod} ${Buffer.from(
-        authToken
-      ).toString('base64')}`,
+      'Authorization': `${authMethod} ${authToken}`,
       'Accept': 'application/json'
     }
   });
