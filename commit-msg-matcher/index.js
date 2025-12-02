@@ -46,7 +46,9 @@ async function requestIssue(ticket) {
   const response = await fetch(ticket.ticketUri(), {
     method: 'GET',
     headers: {
-      'Authorization': `${authMethod} ${authToken}`,
+      'Authorization': `${authMethod} ${Buffer.from(
+        authToken
+      ).toString('base64')}`,
       'Accept': 'application/json'
     }
   });
