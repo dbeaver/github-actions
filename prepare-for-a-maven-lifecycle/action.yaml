@@ -30,8 +30,6 @@ runs:
         project_deps_path: ${{ inputs.project-deps }}
         token: ${{ inputs.token }}
 
-    - uses: dbeaver/github-actions/install-maven@devel
-
     - uses: actions/setup-java@v4
       with:
         distribution: "temurin"
