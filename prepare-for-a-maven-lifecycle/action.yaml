@@ -20,7 +20,7 @@ runs:
       run: echo "CHECKOUT_PATH=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
       shell: bash
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         path: ${{ env.CHECKOUT_PATH || '.' }}
 
