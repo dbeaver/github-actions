@@ -47,6 +47,8 @@ runs:
       run: |
         set -euo pipefail
 
+        # Walk the dependency graph breadth-first. The queue grows as each cloned
+        # repository's project.deps is read; visited prevents duplicates and cycles.
         declare -A visited=()
         queue=()
 
@@ -79,9 +81,11 @@ runs:
             echo "Cloning repository: $repo"
             url="https://github.com/dbeaver/$repo.git"
             default_branch=$(git ls-remote --symref "$url" HEAD | awk '/^ref:/ {sub("refs/heads/", "", $2); print $2; exit}')
+            # Prefer the PR branch, then its base branch, then the remote default.
             git clone --depth 1 -b "${HEAD_BRANCH#refs/heads/}" "$url" 2>/dev/null || \
               git clone --depth 1 -b "${BASE_BRANCH#refs/heads/}" "$url" 2>/dev/null || \
               git clone --depth 1 -b "$default_branch" "$url"
           fi
+          # Also traverse dependencies of repositories already present in the workspace.
           enqueue_dependencies "$repo/project.deps"
         done
