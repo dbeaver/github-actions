@@ -45,11 +45,11 @@ runs:
         GIT_CONFIG_VALUE_1: >-
           !f() { if [ "$1" = get ]; then printf '%s\n' 'username=x-access-token' "password=$GH_TOKEN"; fi; }; f
       run: |
-        set -euo pipefail
+        set -eo pipefail
 
         # Walk the dependency graph breadth-first. Clone each level in parallel,
         # then read its project.deps files to discover the next level.
-        declare -A visited=()
+        visited=' '
         queue=()
         max_parallel=8
 
@@ -92,8 +92,10 @@ runs:
           failed=0
           for ((index=level_start; index<level_end; index++)); do
             repo=${queue[index]}
-            [[ -v visited[$repo] ]] && continue
-            visited[$repo]=1
+            case "$visited" in
+              *" $repo "*) continue ;;
+            esac
+            visited="$visited$repo "
             if [[ ! -d $repo ]]; then
               clone_repository "$repo" &
               pending_pids+=("$!")
