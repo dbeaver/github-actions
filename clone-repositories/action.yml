@@ -15,7 +15,7 @@ inputs:
       [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
     default: ${{ github.token }}
   project_deps_path:
-    description: "The content of the project.deps file with repository names"
+    description: "Path to the project.deps file with repository names"
     required: true
 
 runs:
@@ -35,32 +35,13 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
+        PROJECT_DEPS_PATH: ${{ inputs.project_deps_path }}
+        HEAD_BRANCH: ${{ env.GITHUB_HEAD_REF }}
+        BASE_BRANCH: ${{ env.GITHUB_BASE_REF }}
         GIT_CONFIG_COUNT: '2'
         GIT_CONFIG_KEY_0: credential.helper
         GIT_CONFIG_VALUE_0: ''
         GIT_CONFIG_KEY_1: credential.https://github.com.helper
         GIT_CONFIG_VALUE_1: >-
           !f() { if [ "$1" = get ]; then printf '%s\n' 'username=x-access-token' "password=$GH_TOKEN"; fi; }; f
-      run: |
-        exit_code=0
-        while IFS= read -r repo || [[ -n $repo ]]; do
-          echo "Cloning repository: $repo"
-          {
-            default_branch=$(git ls-remote --symref "https://github.com/dbeaver/$repo.git" HEAD | grep '^ref:' | awk '{print $2}' | sed 's|refs/heads/||')
-
-            # Try to clone the head branch, then the base branch, and finally the default branch
-            git clone --depth 1 -b "${{ env.GITHUB_HEAD_REF }}" "https://github.com/dbeaver/$repo.git" 2>/dev/null || \
-            git clone --depth 1 -b "${{ env.GITHUB_BASE_REF }}" "https://github.com/dbeaver/$repo.git" 2>/dev/null || \
-            git clone --depth 1 -b "$default_branch" "https://github.com/dbeaver/$repo.git"
-
-            # Capture the exit code of the last command
-            if [[ $? -ne 0 ]]; then
-              exit_code=1  # Set exit_code to 1 if any clone command fails
-            fi
-          } &
-        done < "${{ inputs.project_deps_path }}"
-
-        wait
-
-        # Exit with the appropriate exit code
-        exit $exit_code
+      run: bash "${{ github.action_path }}/clone.sh"
