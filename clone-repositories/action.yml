@@ -47,10 +47,11 @@ runs:
       run: |
         set -euo pipefail
 
-        # Walk the dependency graph breadth-first. The queue grows as each cloned
-        # repository's project.deps is read; visited prevents duplicates and cycles.
+        # Walk the dependency graph breadth-first. Clone each level in parallel,
+        # then read its project.deps files to discover the next level.
         declare -A visited=()
         queue=()
+        max_parallel=8
 
         enqueue_dependencies() {
           local file=$1 repo
@@ -68,24 +69,50 @@ runs:
           done < "$file"
         }
 
+        clone_repository() {
+          local repo=$1 url default_branch
+          echo "Cloning repository: $repo"
+          url="https://github.com/dbeaver/$repo.git"
+          default_branch=$(git ls-remote --symref "$url" HEAD | awk '/^ref:/ {sub("refs/heads/", "", $2); print $2; exit}')
+          # Prefer the PR branch, then its base branch, then the remote default.
+          git clone --depth 1 -b "${HEAD_BRANCH#refs/heads/}" "$url" 2>/dev/null || \
+            git clone --depth 1 -b "${BASE_BRANCH#refs/heads/}" "$url" 2>/dev/null || \
+            git clone --depth 1 -b "$default_branch" "$url"
+        }
+
         if [[ ! -f $PROJECT_DEPS_PATH ]]; then
           echo "Dependency file not found: $PROJECT_DEPS_PATH" >&2
           exit 1
         fi
         enqueue_dependencies "$PROJECT_DEPS_PATH"
-        for ((index=0; index<${#queue[@]}; index++)); do
-          repo=${queue[index]}
-          [[ -v visited[$repo] ]] && continue
-          visited[$repo]=1
-          if [[ ! -d $repo ]]; then
-            echo "Cloning repository: $repo"
-            url="https://github.com/dbeaver/$repo.git"
-            default_branch=$(git ls-remote --symref "$url" HEAD | awk '/^ref:/ {sub("refs/heads/", "", $2); print $2; exit}')
-            # Prefer the PR branch, then its base branch, then the remote default.
-            git clone --depth 1 -b "${HEAD_BRANCH#refs/heads/}" "$url" 2>/dev/null || \
-              git clone --depth 1 -b "${BASE_BRANCH#refs/heads/}" "$url" 2>/dev/null || \
-              git clone --depth 1 -b "$default_branch" "$url"
+        level_start=0
+        while ((level_start < ${#queue[@]})); do
+          level_end=${#queue[@]}
+          pending_pids=()
+          failed=0
+          for ((index=level_start; index<level_end; index++)); do
+            repo=${queue[index]}
+            [[ -v visited[$repo] ]] && continue
+            visited[$repo]=1
+            if [[ ! -d $repo ]]; then
+              clone_repository "$repo" &
+              pending_pids+=("$!")
+              if ((${#pending_pids[@]} >= max_parallel)); then
+                if ! wait "${pending_pids[0]}"; then failed=1; fi
+                pending_pids=("${pending_pids[@]:1}")
+              fi
+            fi
+          done
+          for pid in "${pending_pids[@]}"; do
+            if ! wait "$pid"; then failed=1; fi
+          done
+          if ((failed)); then
+            echo "One or more repository clones failed" >&2
+            exit 1
           fi
-          # Also traverse dependencies of repositories already present in the workspace.
-          enqueue_dependencies "$repo/project.deps"
+          # Include dependencies of existing checkouts, but never revisit a repo.
+          for ((index=level_start; index<level_end; index++)); do
+            enqueue_dependencies "${queue[index]}/project.deps"
+          done
+          level_start=$level_end
         done
